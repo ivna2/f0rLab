@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>Абонементы | Fitness Club</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <script>
+        document.documentElement.setAttribute(
+            "data-theme",
+            localStorage.getItem("fitnessclub-theme")
+            || (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")
+        );
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/app-theme.css">
+</head>
+<body>
+<div class="theme-fab">
+    <button type="button" class="theme-toggle" data-theme-toggle aria-label="Переключить тему">
+        <span class="theme-toggle-thumb"></span>
+        <span class="theme-toggle-track"><span>☀️</span><span>🌙</span></span>
+    </button>
+</div>
+<main class="page-shell">
+    <header class="panel app-header">
+        <div class="header-meta">
+            <p class="hero-kicker">Admin CRUD</p>
+            <h1 class="page-title">Абонементы</h1>
+            <p class="page-subtitle">Сроки действия абонементов и привязка их к участникам клуба.</p>
+        </div>
+        <div class="header-actions">
+            <a href="/admin/dashboard" class="link-button button-secondary">Назад в панель</a>
+        </div>
+    </header>
+
+    <div th:if="${errorMessage}" class="status-banner error" data-auto-dismiss th:text="${errorMessage}"></div>
+    <div th:if="${successMessage}" class="status-banner success" data-auto-dismiss th:text="${successMessage}"></div>
+
+    <section class="app-grid crud-col">
+        <section class="table-card">
+            <p class="section-kicker">Активности</p>
+            <h2 class="section-title">Список абонементов</h2>
+            <div class="table-wrap spaced-top">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Участник</th>
+                        <th>Начало</th>
+                        <th>Окончание</th>
+                        <th>Действия</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="s : ${subscriptions}">
+                        <td th:text="${s.id}"></td>
+                        <td th:text="${s.member.name}"></td>
+                        <td th:text="${s.startDate}"></td>
+                        <td th:text="${s.endDate}"></td>
+                        <td>
+                            <form th:action="@{/subscriptions/delete/{id}(id=${s.id})}" method="post" data-confirm-message="Удалить абонемент?">
+                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                                <button class="button button-danger" type="submit">Удалить</button>
+                            </form>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div th:if="${subscriptions.isEmpty()}" class="empty-state spaced-top">Абонементов пока нет. Добавьте запись через форму справа.</div>
+        </section>
+
+        <aside class="panel">
+            <p class="section-kicker">Создание</p>
+            <h2 class="section-title">Новый абонемент</h2>
+            <form th:action="@{/subscriptions/add}" method="post" class="form-stack spaced-top">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                <div class="field">
+                    <label for="memberSelect">Участник</label>
+                    <select id="memberSelect" name="memberId" required>
+                        <option value="">Выберите участника</option>
+                        <option th:each="m : ${members}" th:value="${m.id}" th:text="${m.name + ' • ' + m.email}"></option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="startDate">Дата начала</label>
+                    <input id="startDate" name="startDate" type="date" required>
+                </div>
+                <div class="field">
+                    <label for="endDate">Дата окончания</label>
+                    <input id="endDate" name="endDate" type="date" required>
+                    <small>Если даты выбраны неверно, система покажет точную причину ошибки.</small>
+                </div>
+                <div class="action-row">
+                    <button type="submit" class="button button-primary">Добавить</button>
+                    <button type="reset" class="button button-secondary">Очистить</button>
+                </div>
+            </form>
+        </aside>
+    </section>
+</main>
+<script src="/js/theme.js"></script>
+</body>
+</html>
