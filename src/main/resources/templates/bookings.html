@@ -57,7 +57,6 @@
                     <tr th:each="b : ${bookings}">
                         <td th:text="${b.id}"></td>
                         <td th:text="${b.member.name}"></td>
-<<<<<<< HEAD
                         <td th:text="${b.lesson.name + ' • ' + b.lesson.trainer.name}"></td>
                         <td th:text="${b.date}"></td>
                         <td>
@@ -71,15 +70,6 @@
                                     <button type="submit" class="button button-danger">Отменить</button>
                                 </form>
                             </div>
-=======
-                        <td th:text="${b.lesson.name}"></td>
-                        <td th:text="${b.date}"></td>
-                        <td>
-                            <form th:action="@{/bookings/delete/{id}(id=${b.id})}" method="post" data-confirm-message="Отменить бронирование?">
-                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                                <button class="button button-danger" type="submit">Отменить</button>
-                            </form>
->>>>>>> 524a0e1364287037ac59b4a573e1ba2a6b60e60d
                         </td>
                     </tr>
                     </tbody>
@@ -88,7 +78,6 @@
             <div th:if="${bookings.isEmpty()}" class="empty-state spaced-top">Бронирований пока нет. Добавьте первую запись через форму справа.</div>
         </section>
 
-<<<<<<< HEAD
         <aside class="stack">
             <section class="panel">
                 <p class="section-kicker">Создание</p>
@@ -165,44 +154,6 @@
                     </div>
                 </form>
             </section>
-=======
-        <aside class="panel">
-            <p class="section-kicker">Создание</p>
-            <h2 class="section-title">Новое бронирование</h2>
-            <form th:action="@{/bookings/add}" method="post" class="form-stack spaced-top">
-                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                <div class="field">
-                    <label for="memberSelect">Участник</label>
-                    <select id="memberSelect" name="memberId" required>
-                        <option value="">Выберите участника</option>
-                        <option th:each="m : ${members}" th:value="${m.id}" th:text="${m.name + ' • ' + m.email}"></option>
-                    </select>
-                </div>
-                <div class="field">
-                    <label for="trainerSelect">Тренер</label>
-                    <select id="trainerSelect" name="trainerId" data-lessons-source="lessonSelect" required>
-                        <option value="">Выберите тренера</option>
-                        <option th:each="t : ${trainers}" th:value="${t.id}" th:text="${t.name + ' • ' + t.specialization}"></option>
-                    </select>
-                </div>
-                <div class="field">
-                    <label for="lessonSelect">Свободные даты и время</label>
-                    <select id="lessonSelect" name="lessonId" required>
-                        <option value="">Сначала выберите тренера</option>
-                        <option th:each="l : ${lessons}"
-                                th:value="${l.id}"
-                                th:attr="data-trainer-id=${l.trainer.id}"
-                                th:text="${l.name + ' • ' + #temporals.format(l.dateTime, 'dd.MM.yyyy HH:mm') + ' • мест: ' + l.capacity}">
-                        </option>
-                    </select>
-                    <small>Показываются готовые слоты выбранного тренера. Ручной ввод даты больше не нужен.</small>
-                </div>
-                <div class="action-row">
-                    <button type="submit" class="button button-primary">Добавить</button>
-                    <button type="reset" class="button button-secondary">Очистить</button>
-                </div>
-            </form>
->>>>>>> 524a0e1364287037ac59b4a573e1ba2a6b60e60d
         </aside>
     </section>
 </main>
