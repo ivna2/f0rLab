@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8" />
+    <title>Fitness Club — Dashboard</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --accent:#16a34a;
+            --muted:#6b7280;
+
+            /* Светлая тема — голубоватый фон и жёлтые частицы */
+            --bg-gradient: linear-gradient(200deg, #c8e3ef, #a8d0ef, #9be0ef);
+            --particle-colors: rgba(255,240,150,1.0), rgba(255,220,100,1.2), rgba(255,215,100,0.8);
+            --text-color: #1e293b;
+
+            --oval-bg: rgba(255,255,255,0.12);
+            --oval-border: rgba(255,255,255,0.08);
+        }
+
+        body.dark {
+            --bg-gradient: linear-gradient(270deg, #0f172a, #1e293b, #111827);
+            --particle-colors: rgba(255,255,255,1), rgba(255,255,255,0.85), rgba(255,255,255,0.7);
+            --text-color: #e2e8f0;
+
+            --oval-bg: rgba(255,255,255,0.02);
+            --oval-border: rgba(255,255,255,0.02);
+        }
+
+        @keyframes gradientFlow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @keyframes ovalPulse {
+            0%, 100% {
+                opacity: 0.9;
+                box-shadow: 0 0 80px rgba(255,255,255,0.08) inset;
+            }
+            50% {
+                opacity: 1;
+                box-shadow: 0 0 100px rgba(255,255,255,0.12) inset;
+            }
+        }
+
+        body {
+            font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;
+            overflow: hidden;
+            background: var(--bg-gradient);
+            background-size: 400% 400%;
+            animation: gradientFlow 20s ease infinite;
+            transition: background 1s ease, color 1s ease;
+            color: var(--text-color);
+        }
+
+        h1, h2, h3, p, a, div { transition: color 1s ease; }
+
+        .card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.48), rgba(255,255,255,0.32));
+            backdrop-filter: blur(10px);
+            border-radius: 14px;
+            box-shadow: 0 10px 30px rgba(16,24,40,0.08);
+            transition: transform .22s cubic-bezier(.2,.9,.3,1),
+            box-shadow .22s,
+            background 1s ease,
+            color 1s ease;
+        }
+        body.dark .card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.12));
+            color: #e2e8f0;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(16,24,40,0.15);
+        }
+
+        canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: -2;
+            transition: opacity 0.8s ease;
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 50;
+            cursor: pointer;
+            width: 50px;
+            height: 26px;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #e2e8f0;
+            font-size: 20px;
+            transition: background 0.5s ease, transform 0.15s;
+        }
+        body.dark .theme-toggle {
+            background: #334155;
+        }
+        .theme-toggle:active { transform: scale(0.97); }
+
+        /* --- Почти прозрачный овал с мягкой пульсацией --- */
+        .oval-overlay {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80vw;
+            height: 70vh;
+            border-radius: 50%;
+            background: var(--oval-bg);
+            border: 1px solid var(--oval-border);
+            backdrop-filter: blur(40px);
+            z-index: -1;
+            animation: ovalPulse 6s ease-in-out infinite;
+            transition: background 1s ease, border 1s ease, box-shadow 1s ease;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-6">
+
+<canvas id="bgCanvas"></canvas>
+<div class="oval-overlay"></div>
+<div class="theme-toggle" aria-label="Переключить тему">🌙</div>
+
+<main class="w-full max-w-4xl relative z-10 text-center">
+    <header class="mb-8">
+        <h1 class="text-4xl md:text-5xl font-extrabold leading-tight">Fitness Club</h1>
+        <p class="mt-2">Управление участниками, тренерами, занятиями и бронированиями</p>
+        <div class="mt-4 flex flex-wrap items-center justify-center gap-3">
+            <a href="/register" class="rounded-full bg-green-600 px-5 py-2 text-sm font-semibold text-white hover:bg-green-700">Регистрация</a>
+            <span class="text-sm">После регистрации используйте Basic Auth для защищенных страниц и API.</span>
+        </div>
+    </header>
+
+    <section class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mb-6">
+        <a href="/members-page" class="card p-6 flex flex-col items-center gap-3 text-center hover:shadow-xl hover:-translate-y-1">
+            <div class="text-sm break-words">Участники</div>
+            <div class="text-xl font-semibold break-words">Список и управление</div>
+            <div class="mt-2 text-sm break-words">Добавлять, удалять, просматривать</div>
+        </a>
+        <a href="/trainers-page" class="card p-6 flex flex-col items-center gap-3 text-center hover:shadow-xl hover:-translate-y-1">
+            <div class="text-sm break-words">Тренеры</div>
+            <div class="text-xl font-semibold break-words">Кадры и специализации</div>
+            <div class="mt-2 text-sm break-words">Добавлять тренеров и их данные</div>
+        </a>
+        <a href="/lessons-page" class="card p-6 flex flex-col items-center gap-3 text-center hover:shadow-xl hover:-translate-y-1">
+            <div class="text-sm break-words">Занятия</div>
+            <div class="text-xl font-semibold break-words">Создать и расписание</div>
+            <div class="mt-2 text-sm break-words">Назначать тренеров, вместимость</div>
+        </a>
+    </section>
+
+    <section class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-6">
+        <a href="/subscriptions-page" class="md:col-start-2 md:col-span-2 card p-6 flex flex-col items-center gap-3 text-center hover:shadow-xl hover:-translate-y-1">
+            <div class="text-sm break-words">Подписки</div>
+            <div class="text-xl font-semibold break-words">Планы и периоды</div>
+            <div class="mt-2 text-sm break-words">Управление периодами подписки</div>
+        </a>
+        <a href="/bookings-page" class="md:col-start-4 md:col-span-2 card p-6 flex flex-col items-center gap-3 text-center hover:shadow-xl hover:-translate-y-1">
+            <div class="text-sm break-words">Бронирования</div>
+            <div class="text-xl font-semibold break-words">Запись на занятия</div>
+            <div class="mt-2 text-sm break-words">Создавайте брони участникам</div>
+        </a>
+    </section>
+</main>
+
+<script>
+    const canvas = document.getElementById('bgCanvas');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+    const PARTICLE_COUNT = 60;
+    resizeCanvas();
+
+    function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+
+    function extractColorTokens(cssString) {
+        const regex = /rgba?\([^)]+\)|hsla?\([^)]+\)|#[0-9a-fA-F]{3,8}\b|[a-zA-Z]+/g;
+        const matches = cssString.match(regex);
+        return matches ? matches.map(s => s.trim()) : [];
+    }
+    function colorStringToRGBA(colorStr) {
+        let m = colorStr.match(/rgba?\s*\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)(?:\s*,\s*([\d.]+)\s*)?\)/i);
+        if (m) return { r:+m[1], g:+m[2], b:+m[3], a:m[4]!==undefined?+m[4]:1 };
+        const tmp=document.createElement('div');
+        tmp.style.color=colorStr;
+        document.body.appendChild(tmp);
+        const cs=getComputedStyle(tmp).color;
+        document.body.removeChild(tmp);
+        return colorStringToRGBA(cs);
+    }
+    function rgbaToString(o){return `rgba(${Math.round(o.r)},${Math.round(o.g)},${Math.round(o.b)},${o.a.toFixed(3)})`;}
+    function getParticleColorObjects() {
+        const css=getComputedStyle(document.body).getPropertyValue('--particle-colors')||'';
+        const tokens=extractColorTokens(css);
+        return tokens.length?tokens.map(colorStringToRGBA):[{r:0,g:0,b:0,a:1}];
+    }
+    function random(min,max){return Math.random()*(max-min)+min;}
+    function createParticles(){
+        const palette=getParticleColorObjects();
+        particles=Array.from({length:PARTICLE_COUNT},()=>{const c=palette[Math.floor(Math.random()*palette.length)];
+            return{ x:random(0,canvas.width), y:random(0,canvas.height), r:random(3,7),
+                vx:random(-0.3,0.3), vy:random(-0.3,0.3),
+                color:{...c}, targetColor:{...c} };});
+    }
+    createParticles();
+    function lerp(a,b,t){return a+(b-a)*t;}
+    function animate(){
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        ctx.globalCompositeOperation='lighter';
+        for(const p of particles){
+            p.x+=p.vx; p.y+=p.vy;
+            if(p.x<-50)p.x=canvas.width+50;if(p.x>canvas.width+50)p.x=-50;
+            if(p.y<-50)p.y=canvas.height+50;if(p.y>canvas.height+50)p.y=-50;
+            const speed=0.08;
+            p.color.r=lerp(p.color.r,p.targetColor.r,speed);
+            p.color.g=lerp(p.color.g,p.targetColor.g,speed);
+            p.color.b=lerp(p.color.b,p.targetColor.b,speed);
+            p.color.a=lerp(p.color.a,p.targetColor.a,speed);
+            ctx.beginPath();
+            ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+            const fill=rgbaToString(p.color);
+            ctx.fillStyle=fill;
+            ctx.shadowColor=fill;
+            ctx.shadowBlur=25;
+            ctx.fill();
+        }
+        requestAnimationFrame(animate);
+    }
+    animate();
+    function pickNewTargetsFromPalette(){
+        const palette=getParticleColorObjects();
+        for(const p of particles){
+            const c=palette[Math.floor(Math.random()*palette.length)];
+            p.targetColor={...c};
+        }
+    }
+    const toggle=document.querySelector('.theme-toggle');
+    let theme=localStorage.getItem('theme')||'light';
+    if(theme==='dark')document.body.classList.add('dark');
+    toggle.textContent=theme==='dark'?'☀️':'🌙';
+    pickNewTargetsFromPalette();
+    particles.forEach(p=>p.color={...p.targetColor});
+    toggle.addEventListener('click',()=>{
+        document.body.classList.toggle('dark');
+        theme=document.body.classList.contains('dark')?'dark':'light';
+        localStorage.setItem('theme',theme);
+        toggle.textContent=theme==='dark'?'☀️':'🌙';
+        pickNewTargetsFromPalette();
+    });
+</script>
+
+</body>
+</html>
+

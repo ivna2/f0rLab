@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Вход | Fitness Club</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script>
+        document.documentElement.setAttribute(
+            "data-theme",
+            localStorage.getItem("fitnessclub-theme")
+            || (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")
+        );
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/app-theme.css">
+</head>
+<body>
+<div class="theme-fab">
+    <button type="button" class="theme-toggle" data-theme-toggle aria-label="Переключить тему">
+        <span class="theme-toggle-thumb"></span>
+        <span class="theme-toggle-track"><span>☀️</span><span>🌙</span></span>
+    </button>
+</div>
+<main class="page-shell auth-shell">
+    <div class="auth-grid">
+        <section class="panel hero-panel visual-panel">
+            <p class="hero-kicker">Fitness Club</p>
+            <h1 class="hero-title">Вход</h1>
+            <div class="hero-figure">
+                <img src="/images/my-picture.png" alt="Фитнес-иллюстрация">
+            </div>
+        </section>
+
+        <section class="panel">
+            <div class="action-row" style="justify-content: space-between;">
+                <div>
+                    <p class="section-kicker">Авторизация</p>
+                    <h2 class="section-title">Добро пожаловать обратно</h2>
+                </div>
+            </div>
+
+            <div th:if="${errorMessage}" class="status-banner error spaced-top" data-auto-dismiss th:text="${errorMessage}"></div>
+            <div th:if="${successMessage}" class="status-banner success spaced-top" data-auto-dismiss th:text="${successMessage}"></div>
+
+            <form th:action="@{/login}" method="post" class="form-stack spaced-top">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                <div class="field">
+                    <label for="username">Логин</label>
+                    <input id="username" name="username" required autocomplete="username" placeholder="admin_user">
+                </div>
+                <div class="field">
+                    <label for="password">Пароль</label>
+                    <input id="password" name="password" type="password" required autocomplete="current-password" placeholder="Надежный пароль">
+                    <button type="button" class="link-button button-secondary" data-password-toggle="password">Показать пароль</button>
+                </div>
+                <button type="submit" class="button button-primary">Войти</button>
+            </form>
+
+            <div class="footer-note">
+                Нет аккаунта?
+                <a href="/register" style="color: var(--accent); font-weight: 800;">Перейти к регистрации</a>
+            </div>
+        </section>
+    </div>
+</main>
+<script src="/js/theme.js"></script>
+</body>
+</html>

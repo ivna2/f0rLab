@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Личный кабинет | Fitness Club</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script>
+        document.documentElement.setAttribute(
+            "data-theme",
+            localStorage.getItem("fitnessclub-theme")
+            || (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")
+        );
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/app-theme.css">
+</head>
+<body>
+<div class="theme-fab">
+    <button type="button" class="theme-toggle" data-theme-toggle aria-label="Переключить тему">
+        <span class="theme-toggle-thumb"></span>
+        <span class="theme-toggle-track"><span>☀️</span><span>🌙</span></span>
+    </button>
+</div>
+<main class="page-shell">
+    <header class="panel app-header">
+        <div class="header-meta">
+            <p class="hero-kicker">Member Area</p>
+            <h1 class="page-title" th:text="${dashboard.name}">Имя пользователя</h1>
+            <p class="page-subtitle">Логин: <strong th:text="${dashboard.login}">member</strong></p>
+        </div>
+        <div class="header-actions">
+            <form th:action="@{/logout}" method="post">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                <button class="button button-secondary" type="submit">Выйти</button>
+            </form>
+        </div>
+    </header>
+
+    <div th:if="${successMessage}" class="status-banner success" data-auto-dismiss th:text="${successMessage}"></div>
+    <div th:if="${errorMessage}" class="status-banner error" data-auto-dismiss th:text="${errorMessage}"></div>
+
+    <section class="stack">
+        <section class="panel member-profile-panel">
+            <p class="section-kicker">Профиль</p>
+            <h2 class="section-title">Моя информация</h2>
+            <div class="member-profile-layout spaced-top">
+                <div class="stack">
+                    <div class="photo-frame member-photo-frame">
+                        <img th:if="${dashboard.photoPath}" th:src="${dashboard.photoPath}" alt="Фото профиля" />
+                        <span th:unless="${dashboard.photoPath}">Фото пока не загружено</span>
+                    </div>
+                    <form th:action="@{/member/photo}" method="post" enctype="multipart/form-data" class="form-stack">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                        <div class="field">
+                            <label for="photo">Фото профиля</label>
+                            <input id="photo" type="file" name="photo" accept="image/*">
+                        </div>
+                        <button class="button button-primary" type="submit">Обновить фото</button>
+                    </form>
+                </div>
+
+                <div class="member-details-list">
+                    <article class="mini-card member-wide-card">
+                        <p class="mini-label">Email</p>
+                        <p class="mini-value wrap-value" th:text="${dashboard.email}">member@example.com</p>
+                    </article>
+                    <article class="mini-card member-wide-card">
+                        <p class="mini-label">Телефон</p>
+                        <p class="mini-value wrap-value" th:text="${dashboard.phone != null and !dashboard.phone.isBlank() ? dashboard.phone : 'Не указан'}">+7 (999) 000-00-00</p>
+                    </article>
+                    <article class="mini-card member-wide-card">
+                        <p class="mini-label">Абонемент с</p>
+                        <p class="mini-value" th:text="${dashboard.subscriptionStartDate ?: 'Нет активного'}">01.01.2026</p>
+                    </article>
+                    <article class="mini-card member-wide-card">
+                        <p class="mini-label">Абонемент до</p>
+                        <p class="mini-value" th:text="${dashboard.subscriptionEndDate ?: 'Нет активного'}">01.02.2026</p>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <section class="panel member-side-panel">
+            <p class="section-kicker">Безопасность</p>
+            <h2 class="section-title">Смена пароля</h2>
+            <form th:action="@{/member/password}" method="post" class="form-stack spaced-top" autocomplete="off">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                <div class="field">
+                    <label for="currentPassword">Текущий пароль</label>
+                    <input id="currentPassword" name="currentPassword" type="password" required autocomplete="current-password">
+                    <button type="button" class="link-button button-secondary" data-password-toggle="currentPassword">Показать пароль</button>
+                </div>
+                <div class="field">
+                    <label for="newPassword">Новый пароль</label>
+                    <input id="newPassword" name="newPassword" type="password" required autocomplete="new-password">
+                    <button type="button" class="link-button button-secondary" data-password-toggle="newPassword">Показать пароль</button>
+                </div>
+                <div class="field">
+                    <label for="confirmPassword">Повторите новый пароль</label>
+                    <input id="confirmPassword" name="confirmPassword" type="password" required autocomplete="new-password">
+                    <button type="button" class="link-button button-secondary" data-password-toggle="confirmPassword">Показать пароль</button>
+                </div>
+                <button class="button button-primary" type="submit">Изменить пароль</button>
+            </form>
+
+            <div class="contact-strip spaced-top">
+                <div class="info-card">
+                    <p class="mini-label">Телефон клуба</p>
+                    <p class="mini-value wrap-value" th:text="${contactPhone}">+7 (495) 555-10-10</p>
+                </div>
+                <div class="info-card">
+                    <p class="mini-label">Почта клуба</p>
+                    <p class="mini-value wrap-value" th:text="${contactEmail}">support@fitnessclub.local</p>
+                </div>
+                <div class="contact-note">
+                    Отмена, перенос занятий и смена пароля автоматически попадают в панель уведомлений администратора.
+                </div>
+            </div>
+        </section>
+    </section>
+
+    <section class="panel spaced-top">
+        <div class="notification-header">
+            <div>
+                <p class="section-kicker">Записи</p>
+                <h2 class="section-title">Ближайшие занятия</h2>
+            </div>
+            <span class="stats-badge" th:text="${dashboard.upcomingBookings.size() + ' записей'}">0 записей</span>
+        </div>
+
+        <div class="stack spaced-top" th:if="${!dashboard.upcomingBookings.isEmpty()}">
+            <article th:each="booking : ${dashboard.upcomingBookings}" class="schedule-card">
+                <div class="member-booking-layout">
+                    <div>
+                        <h3 class="section-title schedule-heading" th:text="${booking.lessonName}">Тренировка</h3>
+                        <p class="section-copy spaced-top">Тренер: <strong th:text="${booking.trainerName}">Тренер</strong></p>
+                        <p class="section-copy">Дата и время: <strong th:text="${#temporals.format(booking.dateTime, 'dd.MM.yyyy HH:mm')}">25.03.2026 18:00</strong></p>
+                    </div>
+
+                    <div class="member-booking-actions">
+                        <form th:action="@{/member/bookings/{id}/cancel(id=${booking.bookingId})}" method="post" data-confirm-message="Отменить эту запись?">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                            <button class="button button-danger" type="submit">Отменить запись</button>
+                        </form>
+
+                        <form th:if="${!booking.rescheduleOptions.isEmpty()}" th:action="@{/member/bookings/{id}/reschedule(id=${booking.bookingId})}" method="post" class="form-stack">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                            <div class="field">
+                                <label>Перенос на другое свободное время</label>
+                                <select name="newLessonId">
+                                    <option th:each="option : ${booking.rescheduleOptions}"
+                                            th:value="${option.lessonId}"
+                                            th:text="${option.lessonName + ' • ' + option.trainerName + ' • ' + #temporals.format(option.dateTime, 'dd.MM.yyyy HH:mm') + ' • мест: ' + option.freeSeats}">
+                                    </option>
+                                </select>
+                            </div>
+                            <button class="button button-primary" type="submit">Изменить запись</button>
+                        </form>
+
+                        <div th:if="${booking.rescheduleOptions.isEmpty()}" class="empty-state">
+                            Пока нет свободного альтернативного времени для переноса у этого тренера.
+                        </div>
+                    </div>
+                </div>
+            </article>
+        </div>
+
+        <div th:if="${dashboard.upcomingBookings.isEmpty()}" class="empty-state spaced-top">
+            Ближайших записей пока нет. Если администратор уже создал бронирование, обновите страницу после входа и проверьте, что запись оформлена именно на ваш email.
+        </div>
+    </section>
+</main>
+<script src="/js/theme.js"></script>
+</body>
+</html>

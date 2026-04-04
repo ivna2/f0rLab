@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Панель администратора | Fitness Club</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script>
+        document.documentElement.setAttribute(
+            "data-theme",
+            localStorage.getItem("fitnessclub-theme")
+            || (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")
+        );
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/app-theme.css">
+</head>
+<body>
+<div class="theme-fab">
+    <button type="button" class="theme-toggle" data-theme-toggle aria-label="Переключить тему">
+        <span class="theme-toggle-thumb"></span>
+        <span class="theme-toggle-track"><span>☀️</span><span>🌙</span></span>
+    </button>
+</div>
+<main class="page-shell">
+    <header class="panel app-header">
+        <div class="header-meta">
+            <p class="hero-kicker">Admin Workspace</p>
+            <h1 class="page-title">Панель администратора</h1>
+            <p class="page-subtitle">Вы вошли как <strong th:text="${dashboard.login}">admin</strong>. Здесь собраны управление клубом, создание администраторов и журнал событий.</p>
+        </div>
+        <div class="header-actions">
+            <form th:action="@{/logout}" method="post">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                <button class="button button-secondary" type="submit">Выйти</button>
+            </form>
+        </div>
+    </header>
+
+    <div th:if="${successMessage}" class="status-banner success" data-auto-dismiss th:text="${successMessage}"></div>
+    <div th:if="${errorMessage}" class="status-banner error" data-auto-dismiss th:text="${errorMessage}"></div>
+
+    <section class="app-grid admin-col">
+        <div class="stack">
+            <section class="panel">
+                <p class="section-kicker">Навигация</p>
+                <h2 class="section-title">Быстрые переходы</h2>
+                <div class="actions-grid five spaced-top">
+                    <a href="/members-page" class="quick-link">
+                        <span>Участники</span>
+                        <span>Профили, контакты и основные данные клиентов</span>
+                    </a>
+                    <a href="/subscriptions-page" class="quick-link">
+                        <span>Абонементы</span>
+                        <span>Сроки действия и привязка к участникам</span>
+                    </a>
+                    <a href="/trainers-page" class="quick-link">
+                        <span>Тренеры</span>
+                        <span>Команда клуба и специализации</span>
+                    </a>
+                    <a href="/lessons-page" class="quick-link">
+                        <span>Занятия</span>
+                        <span>Слоты тренировок и расписание по тренерам</span>
+                    </a>
+                    <a href="/bookings-page" class="quick-link">
+                        <span>Бронирования</span>
+                        <span>Активные записи участников на занятия</span>
+                    </a>
+                    <a href="/admin/admins" class="quick-link">
+                        <span>Админы</span>
+                        <span>Список администраторов и управление доступом</span>
+                    </a>
+                </div>
+            </section>
+
+            <section class="panel">
+                <div class="notification-header">
+                    <div>
+                        <p class="section-kicker">События</p>
+                        <h2 class="section-title">Панель уведомлений</h2>
+                    </div>
+                    <div class="inline-actions">
+                        <span class="stats-badge" th:text="${dashboard.notifications.size() + ' событий'}"></span>
+                        <form th:if="${!dashboard.notifications.isEmpty()}" th:action="@{/admin/notifications/clear}" method="post">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                            <button class="button button-danger" type="submit">Очистить</button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="notice-list spaced-top" th:if="${!dashboard.notifications.isEmpty()}">
+                    <article th:each="notification : ${dashboard.notifications}" class="notification-card">
+                        <div class="notification-header">
+                            <div>
+                                <h3 class="section-title notification-title" th:text="${notification.title}">Событие</h3>
+                                <p class="section-copy spaced-top" th:text="${notification.message}">Описание</p>
+                            </div>
+                            <span class="tag" th:text="${notification.type}">TYPE</span>
+                        </div>
+                        <div class="notification-meta">
+                            <span th:text="${notification.actorLogin}">actor</span>
+                            <span th:text="${#temporals.format(notification.createdAt, 'dd.MM.yyyy HH:mm')}">25.03.2026 14:00</span>
+                        </div>
+                    </article>
+                </div>
+
+                <div th:if="${dashboard.notifications.isEmpty()}" class="empty-state spaced-top">
+                    Пока нет уведомлений о действиях пользователей.
+                </div>
+            </section>
+        </div>
+
+        <aside class="panel">
+            <p class="section-kicker">Новый администратор</p>
+            <h2 class="section-title">Добавление администратора</h2>
+            <p class="section-copy spaced-top">
+                Новый пользователь сразу получает полный административный доступ. Проверка сложности пароля выполняется по усиленным правилам безопасности.
+            </p>
+
+            <form th:action="@{/admin/create}" method="post" class="form-stack spaced-top" autocomplete="off">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                <input type="text" class="sr-only" autocomplete="username">
+                <input type="password" class="sr-only" autocomplete="new-password">
+
+                <div class="field">
+                    <label for="login">Логин</label>
+                    <input id="login" name="login" required placeholder="admin_second">
+                </div>
+                <div class="field">
+                    <label for="name">Имя</label>
+                    <input id="name" name="name" required placeholder="Мария Иванова">
+                </div>
+                <div class="field">
+                    <label for="email">Email</label>
+                    <input id="email" name="email" type="email" required placeholder="admin2@example.com">
+                </div>
+                <div class="field">
+                    <label for="phone">Телефон</label>
+                    <input id="phone" name="phone" data-phone-input autocomplete="tel" placeholder="+7 (999) 000-00-00">
+                </div>
+                <div class="field">
+                    <label for="password">Пароль</label>
+                    <input id="password" name="password" type="password" required autocomplete="new-password" placeholder="Надежный пароль 12+ символов">
+                    <small>Нужны строчные и заглавные буквы, цифра, спецсимвол, без пробелов и очевидных последовательностей.</small>
+                    <button type="button" class="link-button button-secondary" data-password-toggle="password">Показать пароль</button>
+                </div>
+                <button class="button button-primary" type="submit">Создать администратора</button>
+            </form>
+        </aside>
+    </section>
+</main>
+<script src="/js/theme.js"></script>
+</body>
+</html>

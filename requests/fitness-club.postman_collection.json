@@ -1,0 +1,532 @@
+{
+  "info": {
+    "_postman_id": "4730fcd0-2f13-46c4-bf4d-0efbca271d70",
+    "name": "Fitness Club API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "createdMemberId",
+      "value": ""
+    },
+    {
+      "key": "createdTrainerId",
+      "value": ""
+    },
+    {
+      "key": "createdLessonId",
+      "value": ""
+    },
+    {
+      "key": "createdSubscriptionId",
+      "value": ""
+    },
+    {
+      "key": "createdBookingId",
+      "value": ""
+    },
+    {
+      "key": "enrolledMemberId",
+      "value": ""
+    },
+    {
+      "key": "enrolledSubscriptionId",
+      "value": ""
+    },
+    {
+      "key": "operationBookingId",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Members CRUD",
+      "item": [
+        {
+          "name": "Get all members",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/members"
+          }
+        },
+        {
+          "name": "Get member by id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/members/{{seedMemberId}}"
+          }
+        },
+        {
+          "name": "Create member",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.collectionVariables.set('createdMemberId', json.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Kirill Ivanov\",\n  \"email\": \"kirill.ivanov@example.com\"\n}"
+            },
+            "url": "{{baseUrl}}/api/members"
+          }
+        },
+        {
+          "name": "Update member",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Kirill Ivanov Updated\",\n  \"email\": \"kirill.ivanov.updated@example.com\"\n}"
+            },
+            "url": "{{baseUrl}}/api/members/{{createdMemberId}}"
+          }
+        },
+        {
+          "name": "Delete member",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/members/{{createdMemberId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Trainers CRUD",
+      "item": [
+        {
+          "name": "Get all trainers",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/trainers"
+          }
+        },
+        {
+          "name": "Get trainer by id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/trainers/{{seedTrainerId}}"
+          }
+        },
+        {
+          "name": "Create trainer",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.collectionVariables.set('createdTrainerId', json.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Elena Romanova\",\n  \"specialization\": \"Pilates\"\n}"
+            },
+            "url": "{{baseUrl}}/trainers"
+          }
+        },
+        {
+          "name": "Update trainer",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Elena Romanova\",\n  \"specialization\": \"Stretching\"\n}"
+            },
+            "url": "{{baseUrl}}/trainers/{{createdTrainerId}}"
+          }
+        },
+        {
+          "name": "Delete trainer",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/trainers/{{createdTrainerId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Lessons CRUD",
+      "item": [
+        {
+          "name": "Get all lessons",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/lessons"
+          }
+        },
+        {
+          "name": "Get lesson by id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/lessons/{{seedLessonId}}"
+          }
+        },
+        {
+          "name": "Create lesson",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.collectionVariables.set('createdLessonId', json.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Pilates Evening\",\n  \"trainerId\": {{seedTrainerId}},\n  \"dateTime\": \"2026-04-05T19:00:00\",\n  \"capacity\": 15\n}"
+            },
+            "url": "{{baseUrl}}/lessons"
+          }
+        },
+        {
+          "name": "Update lesson",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Pilates Evening Advanced\",\n  \"trainerId\": {{seedTrainerId}},\n  \"dateTime\": \"2026-04-05T20:00:00\",\n  \"capacity\": 18\n}"
+            },
+            "url": "{{baseUrl}}/lessons/{{createdLessonId}}"
+          }
+        },
+        {
+          "name": "Delete lesson",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/lessons/{{createdLessonId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Subscriptions CRUD",
+      "item": [
+        {
+          "name": "Get all subscriptions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/subscriptions"
+          }
+        },
+        {
+          "name": "Get subscription by id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/subscriptions/{{seedSubscriptionId}}"
+          }
+        },
+        {
+          "name": "Create subscription",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.collectionVariables.set('createdSubscriptionId', json.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"memberId\": {{seedMemberId}},\n  \"startDate\": \"2026-04-21\",\n  \"endDate\": \"2026-05-21\"\n}"
+            },
+            "url": "{{baseUrl}}/subscriptions"
+          }
+        },
+        {
+          "name": "Update subscription",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"memberId\": {{seedMemberId}},\n  \"startDate\": \"2026-04-22\",\n  \"endDate\": \"2026-05-25\"\n}"
+            },
+            "url": "{{baseUrl}}/subscriptions/{{createdSubscriptionId}}"
+          }
+        },
+        {
+          "name": "Delete subscription",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/subscriptions/{{createdSubscriptionId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Bookings CRUD",
+      "item": [
+        {
+          "name": "Get all bookings",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/bookings"
+          }
+        },
+        {
+          "name": "Get booking by id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/bookings/{{seedBookingId}}"
+          }
+        },
+        {
+          "name": "Create booking",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.collectionVariables.set('createdBookingId', json.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+                "raw": "{\n  \"memberId\": {{secondSeedMemberId}},\n  \"lessonId\": {{seedLessonId}},\n  \"date\": \"2026-04-02\"\n}"
+            },
+            "url": "{{baseUrl}}/bookings"
+          }
+        },
+        {
+          "name": "Update booking",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+                "raw": "{\n  \"memberId\": {{secondSeedMemberId}},\n  \"lessonId\": {{seedLessonId}},\n  \"date\": \"2026-04-03\"\n}"
+            },
+            "url": "{{baseUrl}}/bookings/{{createdBookingId}}"
+          }
+        },
+        {
+          "name": "Delete booking",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/bookings/{{createdBookingId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Business Operations",
+      "item": [
+        {
+          "name": "Enroll member with subscription",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.collectionVariables.set('enrolledMemberId', json.member.id);",
+                  "pm.collectionVariables.set('enrolledSubscriptionId', json.subscription.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Sofia Lebedeva\",\n  \"email\": \"sofia.lebedeva@example.com\",\n  \"subscriptionStartDate\": \"2026-04-01\",\n  \"subscriptionEndDate\": \"2026-05-01\"\n}"
+            },
+            "url": "{{baseUrl}}/api/operations/enroll-member"
+          }
+        },
+        {
+          "name": "Book lesson with business checks",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.collectionVariables.set('operationBookingId', json.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"memberId\": {{enrolledMemberId}},\n  \"lessonId\": {{seedLessonId}}\n}"
+            },
+            "url": "{{baseUrl}}/api/operations/book-lesson"
+          }
+        },
+        {
+          "name": "Reschedule booking",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"newLessonId\": 2\n}"
+            },
+            "url": "{{baseUrl}}/api/operations/bookings/{{operationBookingId}}/reschedule"
+          }
+        },
+        {
+          "name": "Renew subscription",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"memberId\": {{seedMemberId}},\n  \"newEndDate\": \"2026-06-01\"\n}"
+            },
+            "url": "{{baseUrl}}/api/operations/renew-subscription"
+          }
+        },
+        {
+          "name": "Get member schedule",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/operations/members/{{seedMemberId}}/schedule?from=2026-04-01&to=2026-04-30"
+          }
+        },
+        {
+          "name": "Get trainer workload",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/operations/trainers/{{seedTrainerId}}/workload?from=2026-04-01&to=2026-04-30"
+          }
+        }
+      ]
+    }
+  ]
+}
