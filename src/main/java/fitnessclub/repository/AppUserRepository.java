@@ -12,8 +12,11 @@ public interface AppUserRepository extends JpaRepository<AppUser, Long> {
 
     Optional<AppUser> findByMemberId(Long memberId);
 
+<<<<<<< HEAD
     long countByRolesContaining(fitnessclub.model.Role role);
 
+=======
+>>>>>>> 524a0e1364287037ac59b4a573e1ba2a6b60e60d
     boolean existsByLoginIgnoreCase(String login);
 
     boolean existsByEmailIgnoreCase(String email);

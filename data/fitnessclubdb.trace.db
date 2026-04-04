@@ -1458,6 +1458,7 @@ The object is already closed [90007-224]
 2026-03-25 14:15:32.479390+03:00 jdbc[3]: exception
 org.h2.jdbc.JdbcSQLNonTransientException: Объект уже закрыт
 The object is already closed [90007-224]
+<<<<<<< HEAD
 2026-03-28 10:29:09.492641+03:00 database: flush
 org.h2.message.DbException: Внутренняя ошибка: "org.h2.mvstore.MVStoreException: The file is locked: C:/Users/ivand/OneDrive/Рабочий стол/f0rLab-master/data/fitnessclubdb.mv.db [2.2.224/7]"
 General error: "org.h2.mvstore.MVStoreException: The file is locked: C:/Users/ivand/OneDrive/Рабочий стол/f0rLab-master/data/fitnessclubdb.mv.db [2.2.224/7]" [50000-224]
@@ -1734,3 +1735,5 @@ Caused by: org.h2.mvstore.MVStoreException: The file is locked: C:/Users/ivand/O
 	at org.h2.mvstore.SingleFileStore.open(SingleFileStore.java:81)
 	at org.h2.mvstore.MVStore.<init>(MVStore.java:286)
 	... 62 more
+=======
+>>>>>>> 524a0e1364287037ac59b4a573e1ba2a6b60e60d

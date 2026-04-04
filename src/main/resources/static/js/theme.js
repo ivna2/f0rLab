@@ -149,6 +149,7 @@
         }
     }
 
+<<<<<<< HEAD
     function initSimpleEditor(config) {
         const form = document.querySelector(config.formSelector);
         if (!form) {
@@ -197,6 +198,8 @@
         }
     }
 
+=======
+>>>>>>> 524a0e1364287037ac59b4a573e1ba2a6b60e60d
     document.addEventListener("DOMContentLoaded", function () {
         applyTheme(getStoredTheme());
 
@@ -235,6 +238,7 @@
         initPhoneInputs();
         initLessonFilter();
         initMemberEditor();
+<<<<<<< HEAD
         initSimpleEditor({
             formSelector: "[data-trainer-edit-form]",
             buttonSelector: "[data-trainer-edit]",
@@ -334,5 +338,7 @@
                 form.action = "/admin/admins/0/update";
             }
         });
+=======
+>>>>>>> 524a0e1364287037ac59b4a573e1ba2a6b60e60d
     });
 })();

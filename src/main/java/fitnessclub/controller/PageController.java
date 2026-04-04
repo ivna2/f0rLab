@@ -75,6 +75,7 @@ public class PageController {
         return "redirect:/trainers-page";
     }
 
+<<<<<<< HEAD
     @PostMapping("/trainers/update")
     public String updateTrainer(@RequestParam Long id,
                                 @RequestParam String name,
@@ -89,6 +90,8 @@ public class PageController {
         return "redirect:/trainers-page";
     }
 
+=======
+>>>>>>> 524a0e1364287037ac59b4a573e1ba2a6b60e60d
     @GetMapping("/lessons-page")
     public String lessons(Model model) {
         List<LessonFull> lessons = lessonService.getAll().stream()
@@ -127,6 +130,7 @@ public class PageController {
         return "redirect:/lessons-page";
     }
 
+<<<<<<< HEAD
     @PostMapping("/lessons/update")
     public String updateLesson(@RequestParam Long id,
                                @RequestParam String name,
@@ -145,6 +149,8 @@ public class PageController {
         return "redirect:/lessons-page";
     }
 
+=======
+>>>>>>> 524a0e1364287037ac59b4a573e1ba2a6b60e60d
     @GetMapping("/bookings-page")
     public String bookings(Model model) {
         List<BookingFull> bookings = bookingService.getAll().stream()
@@ -193,6 +199,7 @@ public class PageController {
         return "redirect:/bookings-page";
     }
 
+<<<<<<< HEAD
     @PostMapping("/bookings/update")
     public String updateBooking(@RequestParam Long id,
                                 @RequestParam Long memberId,
@@ -208,6 +215,8 @@ public class PageController {
         return "redirect:/bookings-page";
     }
 
+=======
+>>>>>>> 524a0e1364287037ac59b4a573e1ba2a6b60e60d
     @GetMapping("/subscriptions-page")
     public String subscriptions(Model model) {
         List<SubscriptionFull> subscriptions = subscriptionService.getAll().stream()
@@ -244,6 +253,7 @@ public class PageController {
         }
         return "redirect:/subscriptions-page";
     }
+<<<<<<< HEAD
 
     @PostMapping("/subscriptions/update")
     public String updateSubscription(@RequestParam Long id,
@@ -261,4 +271,6 @@ public class PageController {
         }
         return "redirect:/subscriptions-page";
     }
+=======
+>>>>>>> 524a0e1364287037ac59b4a573e1ba2a6b60e60d
 }

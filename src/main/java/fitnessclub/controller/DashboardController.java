@@ -4,7 +4,10 @@ import fitnessclub.dto.AdminDashboardResponse;
 import fitnessclub.dto.ChangePasswordRequest;
 import fitnessclub.dto.CreateAdminRequest;
 import fitnessclub.dto.MemberDashboardResponse;
+<<<<<<< HEAD
 import fitnessclub.dto.UpdateAdminRequest;
+=======
+>>>>>>> 524a0e1364287037ac59b4a573e1ba2a6b60e60d
 import fitnessclub.model.Role;
 import fitnessclub.service.AdminNotificationService;
 import fitnessclub.service.AuthService;
@@ -167,6 +170,7 @@ public class DashboardController {
         return "redirect:/admin/admins";
     }
 
+<<<<<<< HEAD
     @PostMapping("/admin/admins/{id}/update")
     public String updateAdmin(@PathVariable Long id,
                               @RequestParam String login,
@@ -184,6 +188,8 @@ public class DashboardController {
         return "redirect:/admin/admins";
     }
 
+=======
+>>>>>>> 524a0e1364287037ac59b4a573e1ba2a6b60e60d
     @GetMapping("/member-photos/{filename}")
     @ResponseBody
     public ResponseEntity<Resource> memberPhoto(@PathVariable String filename) {

@@ -1,6 +1,7 @@
 package fitnessclub;
 
 import fitnessclub.model.AdminNotification;
+<<<<<<< HEAD
 import fitnessclub.model.AppUser;
 import fitnessclub.model.Member;
 import fitnessclub.model.NotificationType;
@@ -8,6 +9,10 @@ import fitnessclub.model.Role;
 import fitnessclub.repository.AdminNotificationRepository;
 import fitnessclub.repository.AppUserRepository;
 import fitnessclub.repository.MemberRepository;
+=======
+import fitnessclub.model.NotificationType;
+import fitnessclub.repository.AdminNotificationRepository;
+>>>>>>> 524a0e1364287037ac59b4a573e1ba2a6b60e60d
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +22,10 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
+<<<<<<< HEAD
 import java.util.Set;
+=======
+>>>>>>> 524a0e1364287037ac59b4a573e1ba2a6b60e60d
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -42,12 +50,15 @@ class SecurityIntegrationTests {
     @Autowired
     private AdminNotificationRepository adminNotificationRepository;
 
+<<<<<<< HEAD
     @Autowired
     private AppUserRepository appUserRepository;
 
     @Autowired
     private MemberRepository memberRepository;
 
+=======
+>>>>>>> 524a0e1364287037ac59b4a573e1ba2a6b60e60d
     @Test
     void shouldDenyProtectedEndpointWithoutAuthentication() throws Exception {
         mockMvc.perform(get("/api/members"))
@@ -97,6 +108,7 @@ class SecurityIntegrationTests {
 
         Assertions.assertEquals(0, adminNotificationRepository.count());
     }
+<<<<<<< HEAD
 
     @Test
     void shouldPromoteFirstRegisteredUserToAdminWhenDatabaseHasNoAdmins() throws Exception {
@@ -216,4 +228,6 @@ class SecurityIntegrationTests {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.roles[0]").value("MEMBER"));
     }
+=======
+>>>>>>> 524a0e1364287037ac59b4a573e1ba2a6b60e60d
 }
