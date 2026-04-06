@@ -1,7 +1,9 @@
 package fitnessclub.controller;
 
+import fitnessclub.dto.EnrollMemberRequest;
 import fitnessclub.dto.MemberRequest;
 import fitnessclub.service.MemberService;
+import fitnessclub.service.OperationsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -12,12 +14,16 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
+
 @Controller
 @RequiredArgsConstructor
 @RequestMapping("/members")
 public class MemberController {
 
     private final MemberService memberService;
+    private final OperationsService operationsService;
 
     @GetMapping
     public String listMembers(Model model) {
@@ -28,10 +34,20 @@ public class MemberController {
     public String addMember(@RequestParam String name,
                             @RequestParam String email,
                             @RequestParam(required = false, defaultValue = "") String phone,
+                            @RequestParam String subscriptionStartDate,
+                            @RequestParam String subscriptionEndDate,
                             RedirectAttributes redirectAttributes) {
         try {
-            memberService.add(new MemberRequest(name, email, phone));
-            redirectAttributes.addFlashAttribute("successMessage", "Участник добавлен");
+            operationsService.enrollMember(new EnrollMemberRequest(
+                    name,
+                    email,
+                    phone,
+                    LocalDate.parse(subscriptionStartDate),
+                    LocalDate.parse(subscriptionEndDate)
+            ));
+            redirectAttributes.addFlashAttribute("successMessage", "Участник и абонемент добавлены");
+        } catch (DateTimeParseException ex) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Некорректная дата начала или окончания абонемента");
         } catch (ResponseStatusException ex) {
             redirectAttributes.addFlashAttribute("errorMessage", ex.getReason());
         }

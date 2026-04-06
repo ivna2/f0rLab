@@ -14,5 +14,7 @@ public interface SubscriptionRepository extends JpaRepository<Subscription, Long
 
     Optional<Subscription> findTopByMemberIdOrderByEndDateDesc(Long memberId);
 
+    Optional<Subscription> findTopByMemberIdAndEndDateIsNotNullOrderByEndDateDesc(Long memberId);
+
     List<Subscription> findByMemberIdOrderByEndDateDesc(Long memberId);
 }

@@ -4,10 +4,7 @@ import fitnessclub.dto.AdminDashboardResponse;
 import fitnessclub.dto.ChangePasswordRequest;
 import fitnessclub.dto.CreateAdminRequest;
 import fitnessclub.dto.MemberDashboardResponse;
-<<<<<<< HEAD
 import fitnessclub.dto.UpdateAdminRequest;
-=======
->>>>>>> 524a0e1364287037ac59b4a573e1ba2a6b60e60d
 import fitnessclub.model.Role;
 import fitnessclub.service.AdminNotificationService;
 import fitnessclub.service.AuthService;
@@ -35,6 +32,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDate;
 
 @Controller
 @RequiredArgsConstructor
@@ -124,11 +122,34 @@ public class DashboardController {
         return "redirect:/member/dashboard";
     }
 
+    @PostMapping("/member/subscription/renew")
+    public String renewSubscription(@RequestParam String newEndDate, RedirectAttributes redirectAttributes) {
+        try {
+            memberPortalService.renewSubscription(LocalDate.parse(newEndDate));
+            redirectAttributes.addFlashAttribute("successMessage", "Абонемент продлен");
+        } catch (ResponseStatusException ex) {
+            redirectAttributes.addFlashAttribute("errorMessage", ex.getReason());
+        }
+        return "redirect:/member/dashboard";
+    }
+
+    @PostMapping("/member/book-lesson")
+    public String bookLesson(@RequestParam Long lessonId, RedirectAttributes redirectAttributes) {
+        try {
+            memberPortalService.bookLesson(lessonId);
+            redirectAttributes.addFlashAttribute("successMessage", "Запись на занятие оформлена");
+        } catch (ResponseStatusException ex) {
+            redirectAttributes.addFlashAttribute("errorMessage", ex.getReason());
+        }
+        return "redirect:/member/dashboard";
+    }
+
     @GetMapping("/admin/dashboard")
     public String adminDashboard(Model model) {
         AdminDashboardResponse dashboard = new AdminDashboardResponse(
                 authService.getCurrentUser().login(),
-                adminNotificationService.getLatest()
+                adminNotificationService.getLatest(),
+                memberPortalService.getTrainerWorkloadCards(LocalDate.now(), LocalDate.now().plusDays(30))
         );
         model.addAttribute("dashboard", dashboard);
         model.addAttribute("createAdminForm", new CreateAdminRequest("", "", "", "", ""));
@@ -155,7 +176,7 @@ public class DashboardController {
     @PostMapping("/admin/notifications/clear")
     public String clearNotifications(RedirectAttributes redirectAttributes) {
         adminNotificationService.clearAll();
-        redirectAttributes.addFlashAttribute("successMessage", "\u041f\u0430\u043d\u0435\u043b\u044c \u0443\u0432\u0435\u0434\u043e\u043c\u043b\u0435\u043d\u0438\u0439 \u043e\u0447\u0438\u0449\u0435\u043d\u0430");
+        redirectAttributes.addFlashAttribute("successMessage", "Панель уведомлений очищена");
         return "redirect:/admin/dashboard";
     }
 
@@ -170,7 +191,6 @@ public class DashboardController {
         return "redirect:/admin/admins";
     }
 
-<<<<<<< HEAD
     @PostMapping("/admin/admins/{id}/update")
     public String updateAdmin(@PathVariable Long id,
                               @RequestParam String login,
@@ -188,8 +208,6 @@ public class DashboardController {
         return "redirect:/admin/admins";
     }
 
-=======
->>>>>>> 524a0e1364287037ac59b4a573e1ba2a6b60e60d
     @GetMapping("/member-photos/{filename}")
     @ResponseBody
     public ResponseEntity<Resource> memberPhoto(@PathVariable String filename) {

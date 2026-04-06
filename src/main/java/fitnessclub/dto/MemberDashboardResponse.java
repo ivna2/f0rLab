@@ -11,6 +11,8 @@ public record MemberDashboardResponse(
         String photoPath,
         LocalDate subscriptionStartDate,
         LocalDate subscriptionEndDate,
-        List<MemberBookingCardResponse> upcomingBookings
+        List<MemberBookingCardResponse> upcomingBookings,
+        List<MemberBookableLessonResponse> bookableLessons,
+        List<TrainerWorkloadCardResponse> trainerWorkloads
 ) {
 }

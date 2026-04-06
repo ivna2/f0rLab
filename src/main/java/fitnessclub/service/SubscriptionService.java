@@ -31,8 +31,18 @@ public class SubscriptionService {
 
     public Subscription getLatestForMember(Long memberId) {
         memberService.get(memberId);
-        return repo.findTopByMemberIdOrderByEndDateDesc(memberId)
+        return repo.findTopByMemberIdAndEndDateIsNotNullOrderByEndDateDesc(memberId)
                 .orElse(null);
+    }
+
+    public List<Subscription> getAllForMember(Long memberId) {
+        memberService.get(memberId);
+        return repo.findByMemberIdOrderByEndDateDesc(memberId);
+    }
+
+    public boolean hasActiveSubscriptionOn(Long memberId, LocalDate date) {
+        memberService.get(memberId);
+        return repo.existsByMemberIdAndStartDateLessThanEqualAndEndDateGreaterThanEqual(memberId, date, date);
     }
 
     @Transactional
@@ -64,6 +74,12 @@ public class SubscriptionService {
     }
 
     private void validateDates(LocalDate startDate, LocalDate endDate) {
+        if (startDate == null && endDate == null) {
+            return;
+        }
+        if (startDate == null || endDate == null) {
+            throw new ResponseStatusException(BAD_REQUEST, "Для абонемента нужно заполнить обе даты или оставить обе пустыми");
+        }
         if (endDate.isBefore(startDate)) {
             throw new ResponseStatusException(BAD_REQUEST, "Дата окончания абонемента не может быть раньше даты начала");
         }

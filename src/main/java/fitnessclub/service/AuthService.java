@@ -5,19 +5,13 @@ import fitnessclub.dto.ChangePasswordRequest;
 import fitnessclub.dto.CreateAdminRequest;
 import fitnessclub.dto.MemberRequest;
 import fitnessclub.dto.RegisterRequest;
-<<<<<<< HEAD
 import fitnessclub.dto.UpdateAdminRequest;
-=======
->>>>>>> 524a0e1364287037ac59b4a573e1ba2a6b60e60d
 import fitnessclub.model.AppUser;
 import fitnessclub.model.Member;
 import fitnessclub.model.NotificationType;
 import fitnessclub.model.Role;
 import fitnessclub.repository.AppUserRepository;
-<<<<<<< HEAD
 import fitnessclub.util.PhoneNumberUtils;
-=======
->>>>>>> 524a0e1364287037ac59b4a573e1ba2a6b60e60d
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -45,14 +39,9 @@ public class AuthService {
     @Transactional
     public AppUserResponse register(RegisterRequest request) {
         validateRegistration(request.login(), request.name(), request.email(), request.password());
-<<<<<<< HEAD
         boolean hasAdmins = appUserRepository.countByRolesContaining(Role.ADMIN) > 0;
         Member member = resolveMemberForRegistration(request.name(), request.email(), request.phone(), hasAdmins);
         Role initialRole = hasAdmins ? Role.MEMBER : Role.ADMIN;
-=======
-        Member member = resolveMemberForAccount(request.name(), request.email(), request.phone());
-        Role initialRole = appUserRepository.count() == 0 ? Role.ADMIN : Role.MEMBER;
->>>>>>> 524a0e1364287037ac59b4a573e1ba2a6b60e60d
         return toResponse(saveUser(request.login(), request.email(), request.password(), Set.of(initialRole), member));
     }
 
@@ -128,7 +117,6 @@ public class AuthService {
         }
     }
 
-<<<<<<< HEAD
     @Transactional
     public AppUserResponse updateAdmin(Long adminId, UpdateAdminRequest request) {
         AppUser admin = appUserRepository.findById(adminId)
@@ -178,8 +166,6 @@ public class AuthService {
         return toResponse(appUserRepository.save(admin));
     }
 
-=======
->>>>>>> 524a0e1364287037ac59b4a573e1ba2a6b60e60d
     private void validateRegistration(String login, String name, String email, String password) {
         String normalizedLogin = login.trim();
         String normalizedEmail = email.trim().toLowerCase();
@@ -206,7 +192,6 @@ public class AuthService {
                 .orElseGet(() -> memberService.add(new MemberRequest(name, normalizedEmail, phone)));
     }
 
-<<<<<<< HEAD
     private Member resolveMemberForRegistration(String name, String email, String phone, boolean hasAdmins) {
         String normalizedEmail = email.trim().toLowerCase();
 
@@ -243,8 +228,6 @@ public class AuthService {
         return member;
     }
 
-=======
->>>>>>> 524a0e1364287037ac59b4a573e1ba2a6b60e60d
     private void validatePassword(String password, String login, String email, String name) {
         String lowered = password.toLowerCase();
         boolean strong = password.length() >= 12
@@ -310,11 +293,8 @@ public class AuthService {
                 appUser.getLogin(),
                 appUser.getEmail(),
                 appUser.getMember() != null ? appUser.getMember().getId() : null,
-<<<<<<< HEAD
                 appUser.getMember() != null ? appUser.getMember().getName() : null,
                 appUser.getMember() != null ? appUser.getMember().getPhone() : null,
-=======
->>>>>>> 524a0e1364287037ac59b4a573e1ba2a6b60e60d
                 appUser.getRoles()
         );
     }

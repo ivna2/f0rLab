@@ -9,6 +9,7 @@ import fitnessclub.dto.MemberScheduleItemResponse;
 import fitnessclub.dto.RenewSubscriptionRequest;
 import fitnessclub.dto.RescheduleBookingRequest;
 import fitnessclub.dto.SubscriptionRequest;
+import fitnessclub.dto.TrainerWorkloadCardResponse;
 import fitnessclub.dto.TrainerWorkloadLessonResponse;
 import fitnessclub.model.Booking;
 import fitnessclub.model.Lesson;
@@ -47,12 +48,8 @@ public class OperationsService {
 
     @Transactional
     public EnrollmentResponse enrollMember(EnrollMemberRequest request) {
-        Member member = memberService.add(new MemberRequest(request.name(), request.email(), null));
-        Subscription subscription = subscriptionService.add(new SubscriptionRequest(
-                member.getId(),
-                request.subscriptionStartDate(),
-                request.subscriptionEndDate()
-        ));
+        Member member = memberService.add(new MemberRequest(request.name(), request.email(), request.phone()));
+        Subscription subscription = createInitialSubscription(member, request);
         return new EnrollmentResponse(member, subscription);
     }
 
@@ -63,7 +60,7 @@ public class OperationsService {
         ensureMemberHasActiveSubscription(request.memberId(), lesson.getDateTime().toLocalDate());
         ensureBookingCapacity(lesson);
         if (bookingRepository.existsByMemberIdAndLessonId(request.memberId(), request.lessonId())) {
-            throw new ResponseStatusException(CONFLICT, "\u0423\u0447\u0430\u0441\u0442\u043d\u0438\u043a \u0443\u0436\u0435 \u0437\u0430\u043f\u0438\u0441\u0430\u043d \u043d\u0430 \u044d\u0442\u043e \u0437\u0430\u043d\u044f\u0442\u0438\u0435");
+            throw new ResponseStatusException(CONFLICT, "Участник уже записан на это занятие");
         }
         return bookingService.add(new BookingRequest(request.memberId(), request.lessonId(), lesson.getDateTime().toLocalDate()));
     }
@@ -78,7 +75,7 @@ public class OperationsService {
         ensureMemberHasActiveSubscription(existingBooking.getMember().getId(), newLesson.getDateTime().toLocalDate());
         ensureBookingCapacity(newLesson);
         if (bookingRepository.existsByMemberIdAndLessonId(existingBooking.getMember().getId(), newLesson.getId())) {
-            throw new ResponseStatusException(CONFLICT, "\u0423\u0447\u0430\u0441\u0442\u043d\u0438\u043a \u0443\u0436\u0435 \u0437\u0430\u043f\u0438\u0441\u0430\u043d \u043d\u0430 \u0432\u044b\u0431\u0440\u0430\u043d\u043d\u043e\u0435 \u0437\u0430\u043d\u044f\u0442\u0438\u0435");
+            throw new ResponseStatusException(CONFLICT, "Участник уже записан на выбранное занятие");
         }
 
         Booking updated = bookingService.update(
@@ -88,9 +85,9 @@ public class OperationsService {
 
         adminNotificationService.notify(
                 NotificationType.BOOKING_RESCHEDULED,
-                "\u041f\u0435\u0440\u0435\u043d\u043e\u0441 \u0437\u0430\u043f\u0438\u0441\u0438",
-                "\u041f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u0435\u043b\u044c " + actorLogin + " \u043f\u0435\u0440\u0435\u043d\u0435\u0441 \u0437\u0430\u043d\u044f\u0442\u0438\u0435 " + existingBooking.getLesson().getName()
-                        + " \u043d\u0430 " + newLesson.getName() + " (" + newLesson.getDateTime() + ")",
+                "Перенос записи",
+                "Пользователь " + actorLogin + " перенес занятие " + existingBooking.getLesson().getName()
+                        + " на " + newLesson.getName() + " (" + newLesson.getDateTime() + ")",
                 actorLogin
         );
         return updated;
@@ -100,12 +97,12 @@ public class OperationsService {
     public Subscription renewSubscription(RenewSubscriptionRequest request) {
         securityAccessService.ensureCurrentMemberAccess(request.memberId());
         Member member = memberService.get(request.memberId());
-        Subscription lastSubscription = subscriptionRepository.findTopByMemberIdOrderByEndDateDesc(member.getId())
-                .orElseThrow(() -> new ResponseStatusException(BAD_REQUEST, "\u0423 \u0443\u0447\u0430\u0441\u0442\u043d\u0438\u043a\u0430 \u043d\u0435\u0442 \u0430\u0431\u043e\u043d\u0435\u043c\u0435\u043d\u0442\u0430 \u0434\u043b\u044f \u043f\u0440\u043e\u0434\u043b\u0435\u043d\u0438\u044f"));
+        Subscription lastSubscription = subscriptionRepository.findTopByMemberIdAndEndDateIsNotNullOrderByEndDateDesc(member.getId())
+                .orElseThrow(() -> new ResponseStatusException(BAD_REQUEST, "У участника нет абонемента для продления"));
 
         LocalDate newStartDate = lastSubscription.getEndDate().plusDays(1);
         if (!request.newEndDate().isAfter(lastSubscription.getEndDate())) {
-            throw new ResponseStatusException(BAD_REQUEST, "\u041d\u043e\u0432\u0430\u044f \u0434\u0430\u0442\u0430 \u043e\u043a\u043e\u043d\u0447\u0430\u043d\u0438\u044f \u0434\u043e\u043b\u0436\u043d\u0430 \u0431\u044b\u0442\u044c \u043f\u043e\u0437\u0436\u0435 \u0442\u0435\u043a\u0443\u0449\u0435\u0439");
+            throw new ResponseStatusException(BAD_REQUEST, "Новая дата окончания должна быть позже текущей");
         }
 
         return subscriptionService.add(new SubscriptionRequest(member.getId(), newStartDate, request.newEndDate()));
@@ -148,22 +145,16 @@ public class OperationsService {
                 .toList();
     }
 
-    private void ensureMemberHasActiveSubscription(Long memberId, LocalDate lessonDate) {
-        boolean active = subscriptionRepository.existsByMemberIdAndStartDateLessThanEqualAndEndDateGreaterThanEqual(
-                memberId,
-                lessonDate,
-                lessonDate
-        );
-        if (!active) {
-            throw new ResponseStatusException(CONFLICT, "\u041d\u0430 \u0432\u044b\u0431\u0440\u0430\u043d\u043d\u0443\u044e \u0434\u0430\u0442\u0443 \u0443 \u0443\u0447\u0430\u0441\u0442\u043d\u0438\u043a\u0430 \u043d\u0435\u0442 \u0430\u043a\u0442\u0438\u0432\u043d\u043e\u0433\u043e \u0430\u0431\u043e\u043d\u0435\u043c\u0435\u043d\u0442\u0430");
-        }
-    }
-
-    private void ensureBookingCapacity(Lesson lesson) {
-        long bookedSeats = bookingRepository.countByLessonId(lesson.getId());
-        if (bookedSeats >= lesson.getCapacity()) {
-            throw new ResponseStatusException(CONFLICT, "\u041d\u0430 \u044d\u0442\u043e \u0437\u0430\u043d\u044f\u0442\u0438\u0435 \u0431\u043e\u043b\u044c\u0448\u0435 \u043d\u0435\u0442 \u0441\u0432\u043e\u0431\u043e\u0434\u043d\u044b\u0445 \u043c\u0435\u0441\u0442");
-        }
+    @Transactional(readOnly = true)
+    public List<TrainerWorkloadCardResponse> getTrainerWorkloadCards(LocalDate from, LocalDate to) {
+        return trainerService.getAll().stream()
+                .map(trainer -> new TrainerWorkloadCardResponse(
+                        trainer.getId(),
+                        trainer.getName(),
+                        trainer.getSpecialization(),
+                        getTrainerWorkload(trainer.getId(), from, to)
+                ))
+                .toList();
     }
 
     @Transactional
@@ -173,8 +164,8 @@ public class OperationsService {
         bookingService.cancel(booking.getId());
         adminNotificationService.notify(
                 NotificationType.BOOKING_CANCELLED,
-                "\u041e\u0442\u043c\u0435\u043d\u0430 \u0437\u0430\u043f\u0438\u0441\u0438",
-                "\u041f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u0435\u043b\u044c " + actorLogin + " \u043e\u0442\u043c\u0435\u043d\u0438\u043b \u0437\u0430\u043d\u044f\u0442\u0438\u0435 " + booking.getLesson().getName()
+                "Отмена записи",
+                "Пользователь " + actorLogin + " отменил занятие " + booking.getLesson().getName()
                         + " (" + booking.getLesson().getDateTime() + ")",
                 actorLogin
         );
@@ -182,5 +173,37 @@ public class OperationsService {
 
     public long getAvailableSeats(Lesson lesson) {
         return lesson.getCapacity() - bookingRepository.countByLessonId(lesson.getId());
+    }
+
+    private Subscription createInitialSubscription(Member member, EnrollMemberRequest request) {
+        if (request.subscriptionStartDate() == null && request.subscriptionEndDate() == null) {
+            return subscriptionService.add(new SubscriptionRequest(member.getId(), null, null));
+        }
+        if (request.subscriptionStartDate() == null || request.subscriptionEndDate() == null) {
+            throw new ResponseStatusException(BAD_REQUEST, "Для абонемента нужно заполнить обе даты или оставить обе пустыми");
+        }
+        return subscriptionService.add(new SubscriptionRequest(
+                member.getId(),
+                request.subscriptionStartDate(),
+                request.subscriptionEndDate()
+        ));
+    }
+
+    private void ensureMemberHasActiveSubscription(Long memberId, LocalDate lessonDate) {
+        boolean active = subscriptionRepository.existsByMemberIdAndStartDateLessThanEqualAndEndDateGreaterThanEqual(
+                memberId,
+                lessonDate,
+                lessonDate
+        );
+        if (!active) {
+            throw new ResponseStatusException(CONFLICT, "На выбранную дату у участника нет активного абонемента");
+        }
+    }
+
+    private void ensureBookingCapacity(Lesson lesson) {
+        long bookedSeats = bookingRepository.countByLessonId(lesson.getId());
+        if (bookedSeats >= lesson.getCapacity()) {
+            throw new ResponseStatusException(CONFLICT, "На это занятие больше нет свободных мест");
+        }
     }
 }

@@ -35,12 +35,8 @@ public class DataInitializer {
     private final AdminNotificationRepository adminNotificationRepository;
 
     @Bean
-<<<<<<< HEAD
     CommandLineRunner seedData()
     {
-=======
-    CommandLineRunner seedData() {
->>>>>>> 524a0e1364287037ac59b4a573e1ba2a6b60e60d
         return args -> cleanupLegacyDemoDataOnce();
     }
 

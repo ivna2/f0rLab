@@ -28,7 +28,7 @@
         <div class="header-meta">
             <p class="hero-kicker">Admin Workspace</p>
             <h1 class="page-title">Панель администратора</h1>
-            <p class="page-subtitle">Вы вошли как <strong th:text="${dashboard.login}">admin</strong>. Здесь собраны управление клубом, создание администраторов и журнал событий.</p>
+            <p class="page-subtitle">Вы вошли как <strong th:text="${dashboard.login}">admin</strong>.</p>
         </div>
         <div class="header-actions">
             <form th:action="@{/logout}" method="post">
@@ -61,7 +61,7 @@
                     </a>
                     <a href="/lessons-page" class="quick-link">
                         <span>Занятия</span>
-                        <span>Слоты тренировок и расписание по тренерам</span>
+                        <span>Расписание и слоты по тренерам</span>
                     </a>
                     <a href="/bookings-page" class="quick-link">
                         <span>Бронирования</span>
@@ -75,13 +75,50 @@
             </section>
 
             <section class="panel">
+                <p class="section-kicker">Тренеры</p>
+                <h2 class="section-title">Занятость тренеров на ближайшие 30 дней</h2>
+                <div class="stack spaced-top" th:if="${!dashboard.trainerWorkloads.isEmpty()}">
+                    <article th:each="trainer : ${dashboard.trainerWorkloads}" class="schedule-card">
+                        <div class="notification-header">
+                            <div>
+                                <h3 class="section-title schedule-heading" th:text="${trainer.trainerName}">Тренер</h3>
+                                <p class="section-copy spaced-top" th:text="${trainer.specialization != null and !trainer.specialization.isBlank() ? trainer.specialization : 'Специализация не указана'}">Специализация</p>
+                            </div>
+                            <span class="stats-badge" th:text="${trainer.lessons.size() + ' занятий'}">0 занятий</span>
+                        </div>
+
+                        <div class="stack spaced-top" th:if="${!trainer.lessons.isEmpty()}">
+                            <article th:each="lesson : ${trainer.lessons}" class="mini-card">
+                                <p class="mini-label" th:text="${#temporals.format(lesson.dateTime, 'dd.MM.yyyy HH:mm')}">25.03.2026 18:00</p>
+                                <p class="mini-value" th:text="${lesson.lessonName}">Йога</p>
+                                <p class="section-copy spaced-top">
+                                    Занято мест: <strong th:text="${lesson.bookedSeats}">4</strong>
+                                    из
+                                    <strong th:text="${lesson.capacity}">10</strong>
+                                    , свободно:
+                                    <strong th:text="${lesson.availableSeats}">6</strong>
+                                </p>
+                            </article>
+                        </div>
+
+                        <div th:if="${trainer.lessons.isEmpty()}" class="empty-state spaced-top">
+                            На выбранный период у этого тренера пока нет занятий.
+                        </div>
+                    </article>
+                </div>
+                <div th:if="${dashboard.trainerWorkloads.isEmpty()}" class="empty-state spaced-top">
+                    Пока нет тренеров или занятий для отображения загрузки.
+                </div>
+            </section>
+
+            <section class="panel">
                 <div class="notification-header">
                     <div>
                         <p class="section-kicker">События</p>
                         <h2 class="section-title">Панель уведомлений</h2>
                     </div>
                     <div class="inline-actions">
-                        <span class="stats-badge" th:text="${dashboard.notifications.size() + ' событий'}"></span>
+                        <span class="stats-badge" th:text="${dashboard.notifications.size() + ' событий'}">0 событий</span>
                         <form th:if="${!dashboard.notifications.isEmpty()}" th:action="@{/admin/notifications/clear}" method="post">
                             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                             <button class="button button-danger" type="submit">Очистить</button>
@@ -115,7 +152,7 @@
             <p class="section-kicker">Новый администратор</p>
             <h2 class="section-title">Добавление администратора</h2>
             <p class="section-copy spaced-top">
-                Новый пользователь сразу получает полный административный доступ. Проверка сложности пароля выполняется по усиленным правилам безопасности.
+                Новый пользователь сразу получает административный доступ. Проверка пароля выполняется на сервере.
             </p>
 
             <form th:action="@{/admin/create}" method="post" class="form-stack spaced-top" autocomplete="off">
@@ -142,7 +179,7 @@
                 <div class="field">
                     <label for="password">Пароль</label>
                     <input id="password" name="password" type="password" required autocomplete="new-password" placeholder="Надежный пароль 12+ символов">
-                    <small>Нужны строчные и заглавные буквы, цифра, спецсимвол, без пробелов и очевидных последовательностей.</small>
+                    <small>Используйте буквы в разном регистре, цифры и спецсимволы.</small>
                     <button type="button" class="link-button button-secondary" data-password-toggle="password">Показать пароль</button>
                 </div>
                 <button class="button button-primary" type="submit">Создать администратора</button>

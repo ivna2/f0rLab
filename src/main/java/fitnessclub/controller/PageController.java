@@ -75,7 +75,6 @@ public class PageController {
         return "redirect:/trainers-page";
     }
 
-<<<<<<< HEAD
     @PostMapping("/trainers/update")
     public String updateTrainer(@RequestParam Long id,
                                 @RequestParam String name,
@@ -90,8 +89,6 @@ public class PageController {
         return "redirect:/trainers-page";
     }
 
-=======
->>>>>>> 524a0e1364287037ac59b4a573e1ba2a6b60e60d
     @GetMapping("/lessons-page")
     public String lessons(Model model) {
         List<LessonFull> lessons = lessonService.getAll().stream()
@@ -130,7 +127,6 @@ public class PageController {
         return "redirect:/lessons-page";
     }
 
-<<<<<<< HEAD
     @PostMapping("/lessons/update")
     public String updateLesson(@RequestParam Long id,
                                @RequestParam String name,
@@ -149,8 +145,6 @@ public class PageController {
         return "redirect:/lessons-page";
     }
 
-=======
->>>>>>> 524a0e1364287037ac59b4a573e1ba2a6b60e60d
     @GetMapping("/bookings-page")
     public String bookings(Model model) {
         List<BookingFull> bookings = bookingService.getAll().stream()
@@ -199,7 +193,6 @@ public class PageController {
         return "redirect:/bookings-page";
     }
 
-<<<<<<< HEAD
     @PostMapping("/bookings/update")
     public String updateBooking(@RequestParam Long id,
                                 @RequestParam Long memberId,
@@ -215,15 +208,26 @@ public class PageController {
         return "redirect:/bookings-page";
     }
 
-=======
->>>>>>> 524a0e1364287037ac59b4a573e1ba2a6b60e60d
     @GetMapping("/subscriptions-page")
     public String subscriptions(Model model) {
+        List<Member> members = memberService.getVisibleMembers();
         List<SubscriptionFull> subscriptions = subscriptionService.getAll().stream()
                 .map(s -> new SubscriptionFull(s.getId(), s.getMember(), s.getStartDate(), s.getEndDate()))
                 .toList();
-        model.addAttribute("subscriptions", subscriptions);
-        model.addAttribute("members", memberService.getVisibleMembers());
+
+        List<SubscriptionFull> subscriptionsWithEmptyMembers = members.stream()
+                .filter(member -> subscriptions.stream().noneMatch(subscription -> subscription.getMember().getId().equals(member.getId())))
+                .map(member -> new SubscriptionFull(null, member, null, null))
+                .toList();
+
+        List<SubscriptionFull> rows = java.util.stream.Stream.concat(
+                        subscriptions.stream(),
+                        subscriptionsWithEmptyMembers.stream()
+                )
+                .sorted(java.util.Comparator.comparing((SubscriptionFull item) -> item.getMember().getName(), String.CASE_INSENSITIVE_ORDER))
+                .toList();
+        model.addAttribute("subscriptions", rows);
+        model.addAttribute("members", members);
         return "subscriptions";
     }
 
@@ -253,7 +257,6 @@ public class PageController {
         }
         return "redirect:/subscriptions-page";
     }
-<<<<<<< HEAD
 
     @PostMapping("/subscriptions/update")
     public String updateSubscription(@RequestParam Long id,
@@ -271,6 +274,4 @@ public class PageController {
         }
         return "redirect:/subscriptions-page";
     }
-=======
->>>>>>> 524a0e1364287037ac59b4a573e1ba2a6b60e60d
 }

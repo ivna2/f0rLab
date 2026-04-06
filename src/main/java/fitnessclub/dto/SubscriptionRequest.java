@@ -6,7 +6,7 @@ import java.time.LocalDate;
 
 public record SubscriptionRequest(
         @NotNull Long memberId,
-        @NotNull LocalDate startDate,
-        @NotNull LocalDate endDate
+        LocalDate startDate,
+        LocalDate endDate
 ) {
 }

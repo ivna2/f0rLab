@@ -2,10 +2,15 @@ package fitnessclub.service;
 
 import fitnessclub.dto.MemberBookingCardResponse;
 import fitnessclub.dto.MemberBookingOptionResponse;
+import fitnessclub.dto.MemberBookableLessonResponse;
 import fitnessclub.dto.MemberDashboardResponse;
 import fitnessclub.dto.RescheduleBookingRequest;
+import fitnessclub.dto.TrainerWorkloadCardResponse;
+import fitnessclub.dto.BookLessonOperationRequest;
+import fitnessclub.dto.RenewSubscriptionRequest;
 import fitnessclub.model.AppUser;
 import fitnessclub.model.Booking;
+import fitnessclub.model.Lesson;
 import fitnessclub.model.Member;
 import fitnessclub.model.Subscription;
 import lombok.RequiredArgsConstructor;
@@ -18,9 +23,12 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
@@ -48,6 +56,8 @@ public class MemberPortalService {
                 .limit(10)
                 .map(this::toBookingCard)
                 .toList();
+        List<MemberBookableLessonResponse> bookableLessons = buildBookableLessons(member, sourceBookings);
+        List<TrainerWorkloadCardResponse> trainerWorkloads = operationsService.getTrainerWorkloadCards(LocalDate.now(), LocalDate.now().plusDays(30));
 
         return new MemberDashboardResponse(
                 currentUser.getLogin(),
@@ -57,7 +67,9 @@ public class MemberPortalService {
                 member.getPhotoPath(),
                 subscription != null ? subscription.getStartDate() : null,
                 subscription != null ? subscription.getEndDate() : null,
-                bookings
+                bookings,
+                bookableLessons,
+                trainerWorkloads
         );
     }
 
@@ -95,6 +107,25 @@ public class MemberPortalService {
     @Transactional
     public void rescheduleBooking(Long bookingId, Long newLessonId) {
         operationsService.rescheduleBooking(bookingId, new RescheduleBookingRequest(newLessonId));
+    }
+
+    @Transactional
+    public void renewSubscription(LocalDate newEndDate) {
+        AppUser currentUser = securityAccessService.getCurrentUser();
+        Member member = requireMember(currentUser);
+        operationsService.renewSubscription(new RenewSubscriptionRequest(member.getId(), newEndDate));
+    }
+
+    @Transactional
+    public void bookLesson(Long lessonId) {
+        AppUser currentUser = securityAccessService.getCurrentUser();
+        Member member = requireMember(currentUser);
+        operationsService.bookLesson(new BookLessonOperationRequest(member.getId(), lessonId));
+    }
+
+    @Transactional(readOnly = true)
+    public List<TrainerWorkloadCardResponse> getTrainerWorkloadCards(LocalDate from, LocalDate to) {
+        return operationsService.getTrainerWorkloadCards(from, to);
     }
 
     private Member requireMember(AppUser currentUser) {
@@ -169,5 +200,31 @@ public class MemberPortalService {
         }
 
         return java.util.List.of();
+    }
+
+    private List<MemberBookableLessonResponse> buildBookableLessons(Member member, List<Booking> existingBookings) {
+        Set<Long> bookedLessonIds = new HashSet<>();
+        existingBookings.stream()
+                .filter(booking -> booking.getLesson() != null)
+                .map(booking -> booking.getLesson().getId())
+                .forEach(bookedLessonIds::add);
+
+        return lessonService.getAll().stream()
+                .filter(lesson -> lesson.getDateTime().isAfter(LocalDateTime.now()))
+                .filter(lesson -> !bookedLessonIds.contains(lesson.getId()))
+                .filter(lesson -> operationsService.getAvailableSeats(lesson) > 0)
+                .filter(lesson -> subscriptionService.hasActiveSubscriptionOn(member.getId(), lesson.getDateTime().toLocalDate()))
+                .sorted(Comparator.comparing(Lesson::getDateTime))
+                .limit(12)
+                .map(lesson -> new MemberBookableLessonResponse(
+                        lesson.getId(),
+                        lesson.getName(),
+                        lesson.getTrainer().getId(),
+                        lesson.getTrainer().getName(),
+                        lesson.getTrainer().getSpecialization(),
+                        lesson.getDateTime(),
+                        operationsService.getAvailableSeats(lesson)
+                ))
+                .toList();
     }
 }
